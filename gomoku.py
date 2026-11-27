@@ -109,7 +109,7 @@ PACK_NAMES = {"claude": "大肥鱼"}
 # 角色包在线下载(GitHub Release, 国内走 ghfast.top 加速):
 # 用 make_pet_release.py 发布后, 把 catalog.json 的地址填到这里再重新打包。
 # 留空 = 设置页"角色包"里显示"下载源未配置", 其余功能不受影响。
-PET_CATALOG_URL = ""
+PET_CATALOG_URL = "https://ghfast.top/https://github.com/SereinOO/chessboard-pet/releases/download/pets-v1/catalog.json"
 # 全新安装(无角色包)或装完角色包后, 默认选中的形象目录名
 DEFAULT_PET_ROLE = "claude"
 

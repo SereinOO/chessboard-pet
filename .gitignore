@@ -22,3 +22,6 @@ test_cfg_*.json
 
 # WorkBuddy 工作区内部数据
 .workbuddy/
+_release_notes_*.md
+_petrepo.txt
+_petrelease/
