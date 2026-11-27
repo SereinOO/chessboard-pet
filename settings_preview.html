@@ -1,0 +1,127 @@
+<!DOCTYPE html><html><head><meta charset="utf-8">
+<title>桌宠设置</title><style>
+*{box-sizing:border-box}
+body{font-family:"Microsoft YaHei",sans-serif;background:#eef0f4;margin:0;padding:28px 12px;display:flex;justify-content:center;color:#333}
+.panel{width:380px;background:#fff;border-radius:18px;box-shadow:0 6px 24px rgba(0,0,0,.10);padding:16px 16px 14px}
+.head{display:flex;align-items:center;gap:8px;font-size:16px;font-weight:bold;margin:2px 4px 14px}
+.head .hint{font-size:11px;color:#aaa;font-weight:normal;margin-left:auto}
+.sec{margin-bottom:10px}
+.item{display:flex;align-items:center;gap:10px;background:#f7f8fa;border:1px solid #ececf1;border-radius:12px;padding:11px 14px;cursor:pointer;user-select:none}
+.item:hover{background:#f2f3f7}
+.item .ico{font-size:15px}
+.item .tt{font-size:13.5px;color:#333}
+.item .chev{margin-left:auto;color:#b8bcc6;font-size:14px;transition:transform .15s}
+.sec.open .chev{transform:rotate(90deg)}
+.body{display:none;padding:10px 6px 4px}
+.sec.open .body{display:block}
+input{padding:6px 10px;border:1px solid #dcdfe6;border-radius:8px;font-size:13px;outline:none}
+input:focus{border-color:#3d7dff}
+button{padding:6px 14px;border:0;border-radius:8px;background:#3d7dff;color:#fff;cursor:pointer;font-size:13px}
+button:hover{opacity:.9}.del{background:#e5484d}.mini{padding:3px 10px;font-size:12px}
+.skins{display:flex;gap:12px;flex-wrap:wrap}
+.skinbox{text-align:center;cursor:pointer;padding:6px;border-radius:10px;border:2px solid transparent}
+.skinbox.sel{border-color:#3d7dff;background:#eef4ff}
+.skinbox img{width:72px;height:100px;object-fit:contain;background:#fff;border-radius:8px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+td{padding:6px;border-bottom:1px solid #eee}
+.win{color:#2a8a3a;font-weight:bold}.lose{color:#a83a3a;font-weight:bold}.draw{color:#888;font-weight:bold}
+.muted{color:#999;font-size:12px}
+.row{display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap}
+.foot{display:flex;justify-content:flex-end;margin-top:12px}
+.foot button{border-radius:999px;padding:7px 22px}
+</style></head><body>
+<div class="panel">
+<div class="head">⚙ 设置 <span class="hint">保存后桌宠自动生效</span></div>
+<div class="sec" id="sec-name"><div class="item" onclick="tg('sec-name')"><span class="ico">✏️</span><span class="tt">我的昵称</span><span class="chev">›</span></div>
+<div class="body"><div class="row" style="margin-top:0"><input id="name" style="flex:1;min-width:0"> <button onclick="saveAll()">保存</button></div></div></div>
+<div class="sec" id="sec-skin"><div class="item" onclick="tg('sec-skin')"><span class="ico">🐾</span><span class="tt">形象与皮肤</span><span class="chev">›</span></div>
+<div class="body"><div class="skins" id="skins"></div></div></div>
+<div class="sec" id="sec-friend"><div class="item" onclick="tg('sec-friend')"><span class="ico">👥</span><span class="tt">好友 IP</span><span class="chev">›</span></div>
+<div class="body"><table id="ftab"></table>
+<div class="row">备注 <input id="fname" style="width:80px" placeholder="如:小明">
+地址 <input id="faddr" style="width:150px" placeholder="IP:端口">
+<button onclick="addFriend()">添加</button></div></div></div>
+<div class="sec" id="sec-rec"><div class="item" onclick="tg('sec-rec')"><span class="ico">📊</span><span class="tt">战绩统计</span><span class="chev">›</span></div>
+<div class="body"><div id="stats" style="font-size:13px;margin-bottom:6px"></div>
+<table id="byopp"></table>
+<div style="font-size:13px;font-weight:bold;margin:10px 0 4px">最近对局</div><table id="rtab"></table>
+<div class="row"><button class="del" onclick="clearRec()">清空全部记录</button></div></div></div>
+<div class="sec" id="sec-about"><div class="item" onclick="tg('sec-about')"><span class="ico">❓</span><span class="tt">关于</span><span class="chev">›</span></div>
+<div class="body"><div class="muted">五子棋桌宠 · 双人对战版<br>右键菜单里点好友名字可直接约战；<br>所有设置保存在程序目录 config.json。</div></div></div>
+<div class="foot"><button onclick="closePanel()">关闭</button></div>
+</div>
+<script>
+let C = null;
+// ---- 预览用模拟数据(仅此预览文件包含, 程序内无此代码) ----
+const MOCK = {name:'爷', skin:0,
+  skins:[{name:'悟空',file:null},{name:'佐助',file:null},{name:'阿尼亚',file:null},{name:'小僵尸',file:null}],
+  friends:[{name:'小明',addr:'192.168.1.5:27183'},{name:'小红',addr:'192.168.1.6:27185'}],
+  records:[{t:'11-23 10:21',g:'五子棋',opp:'小明',r:'win'},
+           {t:'11-22 21:04',g:'五子棋',opp:'小红',r:'lose'},
+           {t:'11-22 20:37',g:'五子棋',opp:'小明',r:'win'},
+           {t:'11-21 19:12',g:'五子棋',opp:'小红',r:'draw'}]};
+window.fetch = async () => ({ json: async () => C || MOCK });
+// ---- 模拟结束 ----
+
+function tg(id){ document.getElementById(id).classList.toggle('open'); }
+function closePanel(){
+  window.close();
+  setTimeout(()=>{
+    const b=document.querySelector('.foot button');
+    if(b){ b.textContent='浏览器已拦截, 请手动关闭标签页'; b.style.background='#9aa4b2'; }
+  },300);
+}
+async function load(){
+  C = await (await fetch('/api/config')).json();
+  document.getElementById('name').value = C.name;
+  const sk = document.getElementById('skins'); sk.innerHTML='';
+  C.skins.forEach((s,i)=>{
+    const d=document.createElement('div'); d.className='skinbox'+(i===C.skin?' sel':'');
+    if(s.file){ const im=new Image(); im.src='/pets/'+s.file; d.appendChild(im); }
+    else { const t=document.createElement('div'); t.textContent=s.name; d.appendChild(t); }
+    const n=document.createElement('div'); n.textContent=s.name; n.style.fontSize='12px'; d.appendChild(n);
+    d.onclick=()=>{ C.skin=i; saveAll(); };
+    sk.appendChild(d);
+  });
+  const ft=document.getElementById('ftab'); ft.innerHTML='';
+  C.friends.forEach((f,i)=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML='<td>'+f.name+'</td><td>'+f.addr+'</td><td style="text-align:right"><button class="del mini" onclick="delFriend('+i+')">删除</button></td>';
+    ft.appendChild(tr);
+  });
+  if(!C.friends.length) ft.innerHTML='<tr><td class="muted">还没有好友, 在下方添加后可在对局页一键点选</td></tr>';
+  const st=document.getElementById('stats');
+  const cnt={win:0,lose:0,draw:0}; const by={};
+  C.records.forEach(r=>{ cnt[r.r]++; const d=by[r.opp]=by[r.opp]||{win:0,lose:0,draw:0}; d[r.r]++; });
+  st.textContent = `共 ${C.records.length} 局：${cnt.win} 胜 / ${cnt.lose} 负 / ${cnt.draw} 和`;
+  const bo=document.getElementById('byopp'); bo.innerHTML='';
+  Object.keys(by).forEach(k=>{
+    const d=by[k];
+    bo.innerHTML += `<tr><td>${k}</td><td>${d.win}胜 ${d.lose}负 ${d.draw}和</td></tr>`;
+  });
+  if(!Object.keys(by).length) bo.innerHTML='<tr><td class="muted">暂无对局数据</td></tr>';
+  const rt=document.getElementById('rtab'); rt.innerHTML='';
+  C.records.slice(-15).reverse().forEach(r=>{
+    const cls = r.r==='win'?'win':(r.r==='lose'?'lose':'draw');
+    const mark = r.r==='win'?'胜':(r.r==='lose'?'负':'和');
+    rt.innerHTML += `<tr><td>${r.t}</td><td>${r.g}</td><td>vs ${r.opp}</td><td class="${cls}">${mark}</td></tr>`;
+  });
+  if(!C.records.length) rt.innerHTML='<tr><td class="muted">还没有对局记录, 快去邀请好友切磋吧</td></tr>';
+}
+async function saveAll(){
+  C.name = document.getElementById('name').value.trim() || C.name;
+  const res = await fetch('/api/config',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:C.name,skin:C.skin,friends:C.friends})});
+  const j = await res.json(); if(j.ok) await load();
+}
+async function addFriend(){
+  const nm=document.getElementById('fname').value.trim(), ad=document.getElementById('faddr').value.trim();
+  if(!nm||!ad){alert('请填写备注和地址');return;}
+  C.friends.push({name:nm,addr:ad});
+  document.getElementById('fname').value=''; document.getElementById('faddr').value='';
+  await saveAll();
+}
+async function delFriend(i){ C.friends.splice(i,1); await saveAll(); }
+async function clearRec(){ if(!confirm('确定清空全部对局记录?'))return;
+  await fetch('/api/clear_records',{method:'POST'}); await load(); }
+load();
+</script></body></html>

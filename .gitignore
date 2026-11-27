@@ -1,0 +1,24 @@
+# 大体积资产 / 运行时产物一律不入库
+pets/
+pets_raw/
+_rawvid/
+_vidframes/
+_pyembed/
+_light_dist/
+_petrelease/
+dist/
+_tools/
+__pycache__/
+
+# 用户私有数据与日志
+config.json
+test_cfg_*.json
+*.log
+
+# 分发临时产物
+*.zip
+*.exe
+*.bin
+
+# WorkBuddy 工作区内部数据
+.workbuddy/
